@@ -1,16 +1,51 @@
-# Vault password file - NEVER COMMIT
+# Ansible
+*.retry
+*.log
+
+# Vault password files - NEVER COMMIT
+.vault_password_staging
+.vault_password_production
 .vault_password
+.vault_password_*
 
 # Decrypted vault files (should not exist, but just in case)
 *.dec
 
-# Ansible retry files
-*.retry
-
-# Python cache
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# Ansible collections (installed locally)
+collections/
 
 # Temporary files
 *.tmp
+*.bak
+*.swp
+*~
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
 *.log
+
+# Credentials - NEVER COMMIT
+*.key
+*.pem
+*.json
+!package.json
+credentials/
+service-account*.json

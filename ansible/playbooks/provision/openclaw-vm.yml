@@ -1,0 +1,45 @@
+---
+# Playbook: Provision OpenClaw VM
+# ================================
+# This playbook provisions a GCP spot instance for OpenClaw
+#
+# Usage:
+#   ansible-playbook playbooks/provision/openclaw-vm.yml -e "environment=staging"
+#   ansible-playbook playbooks/provision/openclaw-vm.yml -e "environment=production"
+
+- name: Provision OpenClaw VM
+  hosts: localhost
+  connection: local
+  gather_facts: true
+
+  pre_tasks:
+    - name: Display environment
+      debug:
+        msg: "Provisioning for environment: {{ environment | default('staging') }}"
+
+    - name: Set environment fact
+      set_fact:
+        environment: "{{ environment | default('staging') }}"
+        application: "openclaw"
+
+  roles:
+    - role: gcp-compute
+      vars:
+        gcp_instance_name_prefix: "{{ org_short }}-{{ application }}-{{ env_short }}"
+
+  post_tasks:
+    - name: Display provisioned instances
+      debug:
+        msg: |
+          ================================
+          Provisioning Complete!
+          ================================
+          Instance Name: {{ instance_name }}
+          External IP: {{ compute_instance.networkInterfaces[0].accessConfigs[0].natIP }}
+          Internal IP: {{ compute_instance.networkInterfaces[0].networkIP }}
+          Environment: {{ environment }}
+          ================================
+          Next steps:
+          1. Apply base role: ansible-playbook playbooks/deploy/base.yml
+          2. Deploy OpenClaw: ansible-playbook playbooks/deploy/openclaw.yml
+          ================================

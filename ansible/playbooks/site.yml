@@ -1,7 +1,16 @@
 ---
-# Main playbook - Full deployment
-- name: Provision VM for OpenClaw
-  import_playbook: provision.yml
+# Playbook: Full Site Deployment
+# ===============================
+# This playbook runs the complete deployment pipeline
+#
+# Usage:
+#   ansible-playbook playbooks/site.yml -e "environment=staging"
+
+- name: Provision VM
+  import_playbook: provision/openclaw-vm.yml
+
+- name: Apply base configuration
+  import_playbook: deploy/base.yml
 
 - name: Deploy OpenClaw
-  import_playbook: deploy.yml
+  import_playbook: deploy/openclaw.yml
