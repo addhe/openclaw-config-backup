@@ -1,0 +1,7 @@
+---
+# Main playbook - Full deployment
+- name: Provision VM for OpenClaw
+  import_playbook: provision.yml
+
+- name: Deploy OpenClaw
+  import_playbook: deploy.yml
