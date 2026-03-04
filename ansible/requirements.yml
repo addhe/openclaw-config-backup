@@ -1,0 +1,11 @@
+---
+# Ansible Galaxy Collections
+collections:
+  - name: google.cloud
+    version: ">=1.0.0"
+  - name: ansible.builtin
+    version: ">=2.15.0"
+  - name: community.general
+    version: ">=6.0.0"
+
+roles: []

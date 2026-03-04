@@ -1,0 +1,51 @@
+---
+# Playbook: Deploy OpenClaw
+# =========================
+# This playbook deploys OpenClaw to configured VMs
+#
+# Usage:
+#   ansible-playbook playbooks/deploy/openclaw.yml -e "environment=staging"
+
+- name: Deploy OpenClaw
+  hosts: "{{ environment | default('staging') }}"
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Wait for SSH
+      wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts
+      setup:
+
+  roles:
+    - role: openclaw-prereq
+      tags:
+        - prereq
+        - nodejs
+
+    - role: openclaw-install
+      tags:
+        - install
+        - openclaw
+
+    - role: openclaw-config
+      tags:
+        - config
+        - openclaw
+
+  post_tasks:
+    - name: Display completion
+      debug:
+        msg: |
+          ================================
+          OpenClaw Deployment Complete!
+          ================================
+          Environment: {{ environment }}
+          Gateway Port: {{ gateway_port }}
+          Model: {{ openclaw_model }}
+          ================================
+          Test:
+          curl http://{{ ansible_host }}:{{ gateway_port }}/status
+          ================================

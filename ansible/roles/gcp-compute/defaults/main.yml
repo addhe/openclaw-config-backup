@@ -1,0 +1,69 @@
+---
+# GCP Compute Role Defaults
+# =========================
+# Default variables for GCP VM provisioning
+
+# Instance Configuration
+gcp_instance_name_prefix: "{{ org_short }}-{{ environment }}-{{ env_short }}"
+gcp_instance_name_suffix: "{{ '%Y%m%d%H%M%S' | strftime }}"
+
+# Machine Configuration
+gcp_machine_type: "e2-medium"
+gcp_machine_type_spot: "e2-medium"  # Spot instance type
+
+# Spot Instance Configuration
+gcp_spot_instance: true
+gcp_spot_price: "0.02"  # Max price per hour for spot
+gcp_spot_interruption: "TERMINATE"  # TERMINATE or STOP
+
+# Image
+gcp_image_family: "ubuntu-2204-lts"
+gcp_image_project: "ubuntu-os-cloud"
+
+# Disk
+gcp_disk_size_gb: 20
+gcp_disk_type: "pd-ssd"
+gcp_disk_auto_delete: true
+
+# Network
+gcp_network: "default"
+gcp_subnetwork: "default"
+gcp_external_ip: true
+gcp_internal_ip: false
+
+# Firewall
+gcp_firewall_allow_ssh: true
+gcp_firewall_allow_http: true
+gcp_firewall_allow_https: true
+gcp_firewall_allow_gateway: true
+
+# Service Account
+gcp_service_account_email: "{{ vault_gcp_service_account_email }}"
+gcp_service_account_scopes:
+  - "https://www.googleapis.com/auth/compute"
+  - "https://www.googleapis.com/auth/devstorage.read_only"
+  - "https://www.googleapis.com/auth/logging.write"
+  - "https://www.googleapis.com/auth/monitoring.write"
+
+# Preemptible / Spot
+gcp_preemptible: false  # Legacy, use gcp_spot_instance instead
+
+# Tags and Labels
+gcp_instance_labels:
+  environment: "{{ environment }}"
+  managed_by: "ansible"
+  project: "{{ org_name }}"
+  application: "{{ application | default('openclaw') }}"
+  cost_center: "{{ environment }}-infrastructure"
+
+gcp_instance_tags:
+  - "{{ environment }}"
+  - "{{ application | default('openclaw') }}"
+  - "ansible-managed"
+
+# Startup Script
+gcp_startup_script: ""
+
+# Metadata
+gcp_metadata:
+  ssh-keys: "{{ base_user_name }}:{{ ssh_public_key | default('') }}"
