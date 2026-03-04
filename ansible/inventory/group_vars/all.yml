@@ -1,0 +1,30 @@
+---
+# OpenClaw Configuration
+openclaw_version: "latest"
+openclaw_workspace: "/home/openclaw/.openclaw/workspace"
+openclaw_user: "openclaw"
+openclaw_group: "openclaw"
+
+# Node.js Configuration
+nodejs_version: "22"
+
+# Gateway Configuration
+gateway_port: 8080
+gateway_bind: "0.0.0.0"
+gateway_mode: "local"
+
+# Telegram Configuration (values from vault)
+telegram_bot_token: "{{ vault_telegram_bot_token }}"
+telegram_allowed_users: "{{ vault_telegram_allowed_users }}"
+
+# Gateway Auth (value from vault)
+gateway_token: "{{ vault_gateway_token }}"
+
+# OpenAI API (value from vault)
+openai_api_key: "{{ vault_openai_api_key }}"
+
+# Model Configuration
+openclaw_model: "ollama/glm-5:cloud"
+
+# System Configuration
+system_timezone: "Asia/Jakarta"

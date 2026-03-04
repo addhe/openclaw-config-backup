@@ -1,0 +1,8 @@
+---
+- name: Deploy OpenClaw
+  hosts: openclaw
+  become: yes
+
+  roles:
+    - openclaw-install
+    - openclaw-config

@@ -1,0 +1,30 @@
+---
+# OpenClaw Installation Role
+
+- name: Install OpenClaw globally
+  npm:
+    name: openclaw
+    version: "{{ openclaw_version }}"
+    global: yes
+    state: present
+  become_user: "{{ openclaw_user }}"
+  environment:
+    PATH: "/usr/bin:{{ ansible_env.PATH }}"
+
+- name: Verify OpenClaw installation
+  command: openclaw --version
+  register: openclaw_version_output
+  changed_when: false
+  become_user: "{{ openclaw_user }}"
+
+- name: Initialize OpenClaw workspace
+  command: openclaw init
+  args:
+    creates: "/home/{{ openclaw_user }}/.openclaw/openclaw.json"
+  become_user: "{{ openclaw_user }}"
+  environment:
+    PATH: "/usr/bin:{{ ansible_env.PATH }}"
+
+- name: Display OpenClaw version
+  debug:
+    msg: "OpenClaw version: {{ openclaw_version_output.stdout }}"

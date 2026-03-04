@@ -1,0 +1,72 @@
+---
+# OpenClaw Configuration Role
+
+- name: Deploy OpenClaw config file
+  template:
+    src: openclaw.json.j2
+    dest: "/home/{{ openclaw_user }}/.openclaw/openclaw.json"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0600'
+
+- name: Deploy .env file
+  template:
+    src: env.j2
+    dest: "/home/{{ openclaw_user }}/.openclaw/.env"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0600'
+
+- name: Deploy workspace files
+  copy:
+    src: "{{ item }}"
+    dest: "/home/{{ openclaw_user }}/.openclaw/workspace/{{ item }}"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0644'
+  loop:
+    - AGENTS.md
+    - SOUL.md
+    - USER.md
+    - TOOLS.md
+    - IDENTITY.md
+    - HEARTBEAT.md
+
+- name: Deploy systemd service
+  template:
+    src: openclaw.service.j2
+    dest: /etc/systemd/system/openclaw.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Enable OpenClaw service
+  systemd:
+    name: openclaw
+    enabled: yes
+
+- name: Start OpenClaw service
+  systemd:
+    name: openclaw
+    state: started
+
+- name: Wait for OpenClaw to be ready
+  wait_for:
+    port: "{{ gateway_port }}"
+    host: localhost
+    delay: 5
+    timeout: 60
+
+- name: Check OpenClaw status
+  command: systemctl status openclaw
+  register: service_status
+  changed_when: false
+  ignore_errors: yes
+
+- name: Display service status
+  debug:
+    var: service_status.stdout_lines

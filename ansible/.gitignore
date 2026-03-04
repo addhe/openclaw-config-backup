@@ -1,0 +1,16 @@
+# Vault password file - NEVER COMMIT
+.vault_password
+
+# Decrypted vault files (should not exist, but just in case)
+*.dec
+
+# Ansible retry files
+*.retry
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Temporary files
+*.tmp
+*.log
