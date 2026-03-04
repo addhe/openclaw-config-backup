@@ -1,0 +1,50 @@
+# Secrets - NEVER COMMIT THESE
+*.key
+*.pem
+.env
+.env.*
+secrets.json
+credentials.json
+*_credentials.json
+*_secret*.json
+
+# Config with secrets - use template instead
+openclaw.json
+
+# Personal/sensitive memory
+MEMORY.md
+memory/
+*.memory.json
+
+# Delivery queues and logs
+delivery-queue/
+logs/
+*.log
+*.tmp
+
+# Node modules
+node_modules/
+package-lock.json
+
+# Artifacts and temp files
+artifacts/
+tmp/
+
+# Browser/cache
+browser/
+canvas/
+
+# Telegram session data
+telegram/
+
+# Git directory from workspace
+.git/
+
+# Credentials folder
+credentials/
+
+# Devices
+devices/
+
+# Identity sensitive files
+identity/
