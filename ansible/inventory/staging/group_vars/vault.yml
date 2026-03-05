@@ -2,24 +2,17 @@
 # =====================================
 # Ansible Vault Secrets - Staging
 # =====================================
-# ENCRYPT THIS FILE: ansible-vault encrypt inventory/staging/group_vars/vault.yml
-#
-# Expected content (unencrypted):
-# ---
-# # GCP Credentials
-# vault_gcp_project_id: "your-project-id"
-# vault_gcp_service_account_email: "ansible@project-id.iam.gserviceaccount.com"
-# vault_gcp_service_account_key: "/path/to/service-account-key.json"
-#
-# # Telegram
-# vault_telegram_bot_token: "YOUR_BOT_TOKEN"
-# vault_telegram_allowed_users:
-#   - "@BroAwn"
-#
-# # Gateway
-# vault_gateway_token: "YOUR_GATEWAY_TOKEN"
-#
-# # API Keys
-# vault_openai_api_key: "YOUR_OPENAI_API_KEY"
+# GCP Credentials (using OAuth/Application Default Credentials)
+vault_gcp_project_id: "awanmasterpiece"
+vault_gcp_auth_kind: "application"
 
-vault_placeholder: "RUN: ansible-vault encrypt inventory/staging/group_vars/vault.yml"
+# Telegram
+vault_telegram_bot_token: "REDACTED_BOT_TOKEN"
+vault_telegram_allowed_users:
+  - "@BroAwn"
+
+# Gateway
+vault_gateway_token: ""
+
+# API Keys
+vault_openai_api_key: ""

@@ -1,0 +1,31 @@
+---
+# OpenClaw Configuration Role Defaults
+
+# User (inherited)
+openclaw_user: "openclaw"
+openclaw_group: "openclaw"
+
+# Gateway
+gateway_port: 8080
+gateway_bind: "lan"  # Use 'lan' for network access, 'loopback' for localhost only
+gateway_mode: "local"
+
+# Model
+openclaw_model: "ollama/qwen3.5:cloud"
+
+# Service
+openclaw_service_name: "openclaw-gateway"
+openclaw_service_description: "OpenClaw Gateway"
+
+# Workspace
+openclaw_workspace: "/home/openclaw/.openclaw/workspace"
+
+# Telegram (defaults - override in vault)
+telegram_bot_token: ""
+telegram_allowed_users: []
+
+# Gateway token (default - override in vault)
+gateway_token: ""
+
+# OpenAI API key (default - override in vault)
+openai_api_key: ""

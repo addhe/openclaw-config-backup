@@ -4,7 +4,7 @@
 # Default variables for GCP VM provisioning
 
 # Instance Configuration
-gcp_instance_name_prefix: "{{ org_short }}-{{ environment }}-{{ env_short }}"
+gcp_instance_name_prefix: "{{ org_short }}-{{ application | default('openclaw') }}-{{ env_short }}"
 gcp_instance_name_suffix: "{{ '%Y%m%d%H%M%S' | strftime }}"
 
 # Machine Configuration
@@ -37,8 +37,8 @@ gcp_firewall_allow_http: true
 gcp_firewall_allow_https: true
 gcp_firewall_allow_gateway: true
 
-# Service Account
-gcp_service_account_email: "{{ vault_gcp_service_account_email }}"
+# Service Account (uses default compute SA or override in group_vars)
+gcp_service_account_email: "361046956504-compute@developer.gserviceaccount.com"
 gcp_service_account_scopes:
   - "https://www.googleapis.com/auth/compute"
   - "https://www.googleapis.com/auth/devstorage.read_only"
@@ -50,14 +50,14 @@ gcp_preemptible: false  # Legacy, use gcp_spot_instance instead
 
 # Tags and Labels
 gcp_instance_labels:
-  environment: "{{ environment }}"
+  environment: "{{ deploy_env }}"
   managed_by: "ansible"
   project: "{{ org_name }}"
   application: "{{ application | default('openclaw') }}"
-  cost_center: "{{ environment }}-infrastructure"
+  cost_center: "{{ deploy_env }}-infrastructure"
 
 gcp_instance_tags:
-  - "{{ environment }}"
+  - "{{ deploy_env }}"
   - "{{ application | default('openclaw') }}"
   - "ansible-managed"
 
@@ -66,4 +66,8 @@ gcp_startup_script: ""
 
 # Metadata
 gcp_metadata:
-  ssh-keys: "{{ base_user_name }}:{{ ssh_public_key | default('') }}"
+  ssh-keys: "admin:ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDG7Nn86wgQscOColhmdAw9Bhl97snGyYvZdRwnLbiwq shannon@test-spot-vm"
+
+# SSH Access (for inventory)
+base_user_name: "admin"
+base_ssh_port: 22

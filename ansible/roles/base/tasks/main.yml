@@ -29,7 +29,7 @@
 
 - name: Set locale
   locale_gen:
-    name: "{{ base_locale }}"
+    name: "{{ base_locale | default('en_US.UTF-8') }}"
     state: present
 
 - name: Create admin user

@@ -56,7 +56,7 @@
 
 - name: Wait for OpenClaw to be ready
   wait_for:
-    port: "{{ gateway_port }}"
+    port: "{{ gateway_port | default(8080) }}"
     host: localhost
     delay: 5
     timeout: 60
