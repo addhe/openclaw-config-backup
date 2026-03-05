@@ -41,6 +41,11 @@
   register: npm_version
   changed_when: false
 
+- name: Create openclaw group
+  group:
+    name: "{{ openclaw_group }}"
+    state: present
+
 - name: Create openclaw user
   user:
     name: "{{ openclaw_user }}"

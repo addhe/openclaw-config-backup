@@ -1,96 +1,26 @@
 {
   "meta": {
-    "lastTouchedVersion": "2026.2.13",
-    "lastTouchedAt": "{{ ansible_date_time.iso8601 }}"
+    "lastTouchedVersion": "2026.3.2"
   },
   "agents": {
     "defaults": {
-      "model": {
-        "primary": "{{ openclaw_model }}"
-      },
-      "workspace": "{{ openclaw_workspace }}",
-      "maxConcurrent": 4,
-      "subagents": {
-        "maxConcurrent": 8
-      },
-      "compaction": {
-        "mode": "safeguard",
-        "reserveTokensFloor": 12000,
-        "memoryFlush": {
-          "enabled": true,
-          "softThresholdTokens": 8000
-        }
-      }
+      "model": "{{ openclaw_model }}",
+      "workspace": "{{ openclaw_workspace }}"
     },
     "list": [
       {
         "id": "main",
         "name": "main",
-        "workspace": "{{ openclaw_workspace }}",
-        "agentDir": "/home/{{ openclaw_user }}/.openclaw/agents/main/agent",
-        "model": "{{ openclaw_model }}"
+        "workspace": "{{ openclaw_workspace }}"
       }
     ]
-  },
-  "messages": {
-    "ackReactionScope": "group-mentions",
-    "tts": {
-      "auto": "tagged",
-      "provider": "edge",
-      "edge": {
-        "enabled": true,
-        "voice": "id-ID-GadisNeural",
-        "lang": "id-ID",
-        "outputFormat": "audio-24khz-48kbitrate-mono-mp3",
-        "rate": "+0%",
-        "pitch": "+0%"
-      },
-      "modelOverrides": {
-        "enabled": true
-      }
-    }
-  },
-  "commands": {
-    "native": "auto",
-    "nativeSkills": "auto",
-    "restart": true
-  },
-  "session": {
-    "dmScope": "per-channel-peer"
-  },
-  "hooks": {
-    "internal": {
-      "enabled": true,
-      "entries": {
-        "boot-md": {
-          "enabled": true
-        },
-        "bootstrap-extra-files": {
-          "enabled": true
-        },
-        "command-logger": {
-          "enabled": true
-        },
-        "session-memory": {
-          "enabled": true
-        }
-      }
-    }
   },
   "channels": {
     "telegram": {
       "enabled": true,
-      "dmPolicy": "allowlist",
       "botToken": "{{ telegram_bot_token }}",
-      "groups": {
-        "-370043467": {
-          "requireMention": false,
-          "groupPolicy": "open"
-        }
-      },
-      "allowFrom": {{ telegram_allowed_users | to_nice_json }},
-      "groupPolicy": "allowlist",
-      "streamMode": "partial"
+      "allowFrom": {{ telegram_allowed_users | to_json }},
+      "groupPolicy": "open"
     }
   },
   "gateway": {
@@ -101,26 +31,12 @@
       "mode": "token",
       "token": "{{ gateway_token }}"
     },
-    "tailscale": {
-      "mode": "off",
-      "resetOnExit": false
-    },
-    "nodes": {
-      "denyCommands": [
-        "camera.snap",
-        "camera.clip",
-        "screen.record",
-        "calendar.add",
-        "contacts.add",
-        "reminders.add"
+    "controlUi": {
+      "allowedOrigins": [
+        "http://localhost:{{ gateway_port }}",
+        "http://127.0.0.1:{{ gateway_port }}",
+        "http://{{ ansible_default_ipv4.address }}:{{ gateway_port }}"
       ]
-    }
-  },
-  "plugins": {
-    "entries": {
-      "telegram": {
-        "enabled": true
-      }
     }
   }
 }

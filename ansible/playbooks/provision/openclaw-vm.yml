@@ -4,22 +4,26 @@
 # This playbook provisions a GCP spot instance for OpenClaw
 #
 # Usage:
-#   ansible-playbook playbooks/provision/openclaw-vm.yml -e "environment=staging"
-#   ansible-playbook playbooks/provision/openclaw-vm.yml -e "environment=production"
+#   ansible-playbook playbooks/provision/openclaw-vm.yml -e "deploy_env=staging"
+#   ansible-playbook playbooks/provision/openclaw-vm.yml -e "deploy_env=production"
 
 - name: Provision OpenClaw VM
   hosts: localhost
   connection: local
   gather_facts: true
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/staging/group_vars/all.yml"
+    - "{{ playbook_dir }}/../inventory/staging/group_vars/gcp.yml"
+    - "{{ playbook_dir }}/../inventory/staging/group_vars/vault.yml"
 
   pre_tasks:
     - name: Display environment
       debug:
-        msg: "Provisioning for environment: {{ environment | default('staging') }}"
+        msg: "Provisioning for environment: {{ deploy_env | default('staging') }}"
 
     - name: Set environment fact
       set_fact:
-        environment: "{{ environment | default('staging') }}"
+        deploy_env: "{{ deploy_env | default('staging') }}"
         application: "openclaw"
 
   roles:
@@ -37,7 +41,7 @@
           Instance Name: {{ instance_name }}
           External IP: {{ compute_instance.networkInterfaces[0].accessConfigs[0].natIP }}
           Internal IP: {{ compute_instance.networkInterfaces[0].networkIP }}
-          Environment: {{ environment }}
+          Environment: {{ deploy_env }}
           ================================
           Next steps:
           1. Apply base role: ansible-playbook playbooks/deploy/base.yml

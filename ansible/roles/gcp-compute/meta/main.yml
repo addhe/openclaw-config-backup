@@ -15,5 +15,5 @@ galaxy_info:
     - cloud
     - provisioning
 
-dependencies:
-  - role: base
+dependencies: []
+# Note: base role is applied AFTER provisioning via playbooks/deploy/base.yml
