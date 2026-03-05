@@ -11,11 +11,17 @@
     fail_msg: "Required GCP variables are not defined"
     success_msg: "All required GCP variables are defined"
 
+- name: Set auth kind fact
+  set_fact:
+    gcp_auth: "{{ gcp_auth_kind | default('application') }}"
+    gcp_sa_file: "{{ gcp_service_account_file | default(omit) }}"
+
 - name: Create VPC Network if not exists
   google.cloud.gcp_compute_network:
     name: "{{ gcp_network }}"
     project: "{{ gcp_project_id }}"
-    auth_kind: application
+    auth_kind: "{{ gcp_auth }}"
+    service_account_file: "{{ gcp_sa_file }}"
     auto_create_subnetworks: false
     state: present
   register: vpc_network
@@ -26,19 +32,21 @@
     name: "{{ gcp_subnetwork }}"
     network: "{{ vpc_network }}"
     region: "{{ gcp_region }}"
-    ip_cidr_range: "10.{{ 10 if environment == 'production' else 20 }}.0.0/24"
+    ip_cidr_range: "10.{{ 10 if deploy_env == 'production' else 20 }}.0.0/24"
     project: "{{ gcp_project_id }}"
-    auth_kind: application
+    auth_kind: "{{ gcp_auth }}"
+    service_account_file: "{{ gcp_sa_file }}"
     state: present
   register: subnetwork
   run_once: true
 
 - name: Create Firewall Rule - SSH
   google.cloud.gcp_compute_firewall:
-    name: "{{ org_short }}-{{ environment }}-allow-ssh"
+    name: "{{ org_short }}-{{ deploy_env }}-allow-ssh"
     network: "{{ vpc_network }}"
     project: "{{ gcp_project_id }}"
-    auth_kind: application
+    auth_kind: "{{ gcp_auth }}"
+    service_account_file: "{{ gcp_sa_file }}"
     allowed:
       - ip_protocol: tcp
         ports:
@@ -46,16 +54,17 @@
     source_ranges:
       - "0.0.0.0/0"
     target_tags:
-      - "{{ environment }}"
+      - "{{ deploy_env }}"
     state: present
   when: gcp_firewall_allow_ssh
 
 - name: Create Firewall Rule - HTTP
   google.cloud.gcp_compute_firewall:
-    name: "{{ org_short }}-{{ environment }}-allow-http"
+    name: "{{ org_short }}-{{ deploy_env }}-allow-http"
     network: "{{ vpc_network }}"
     project: "{{ gcp_project_id }}"
-    auth_kind: application
+    auth_kind: "{{ gcp_auth }}"
+    service_account_file: "{{ gcp_sa_file }}"
     allowed:
       - ip_protocol: tcp
         ports:
@@ -63,16 +72,17 @@
     source_ranges:
       - "0.0.0.0/0"
     target_tags:
-      - "{{ environment }}"
+      - "{{ deploy_env }}"
     state: present
   when: gcp_firewall_allow_http
 
 - name: Create Firewall Rule - HTTPS
   google.cloud.gcp_compute_firewall:
-    name: "{{ org_short }}-{{ environment }}-allow-https"
+    name: "{{ org_short }}-{{ deploy_env }}-allow-https"
     network: "{{ vpc_network }}"
     project: "{{ gcp_project_id }}"
-    auth_kind: application
+    auth_kind: "{{ gcp_auth }}"
+    service_account_file: "{{ gcp_sa_file }}"
     allowed:
       - ip_protocol: tcp
         ports:
@@ -80,16 +90,17 @@
     source_ranges:
       - "0.0.0.0/0"
     target_tags:
-      - "{{ environment }}"
+      - "{{ deploy_env }}"
     state: present
   when: gcp_firewall_allow_https
 
 - name: Create Firewall Rule - Gateway
   google.cloud.gcp_compute_firewall:
-    name: "{{ org_short }}-{{ environment }}-allow-gateway"
+    name: "{{ org_short }}-{{ deploy_env }}-allow-gateway"
     network: "{{ vpc_network }}"
     project: "{{ gcp_project_id }}"
-    auth_kind: application
+    auth_kind: "{{ gcp_auth }}"
+    service_account_file: "{{ gcp_sa_file }}"
     allowed:
       - ip_protocol: tcp
         ports:
@@ -97,7 +108,7 @@
     source_ranges:
       - "0.0.0.0/0"
     target_tags:
-      - "{{ environment }}"
+      - "{{ deploy_env }}"
     state: present
   when: gcp_firewall_allow_gateway
 
@@ -119,7 +130,8 @@
     name: "{{ instance_name }}"
     project: "{{ gcp_project_id }}"
     zone: "{{ gcp_zone }}"
-    auth_kind: application
+    auth_kind: "{{ gcp_auth }}"
+    service_account_file: "{{ gcp_sa_file }}"
     machine_type: "{{ gcp_machine_type_spot }}"
     disks:
       - auto_delete: "{{ gcp_disk_auto_delete }}"
@@ -135,7 +147,6 @@
           - name: External NAT
             type: ONE_TO_ONE_NAT
             network_tier: STANDARD
-        when: gcp_external_ip
     scheduling:
       preemptible: "{{ gcp_spot_instance }}"
       automatic_restart: "{{ not gcp_spot_instance }}"
@@ -159,33 +170,9 @@
       - "Status: {{ compute_instance.status }}"
 
 - name: Wait for instance to be running
-  google.cloud.gcp_compute_instance_info:
-    name: "{{ instance_name }}"
-    project: "{{ gcp_project_id }}"
-    zone: "{{ gcp_zone }}"
-    auth_kind: application
-  register: instance_info
-  until: instance_info.resources[0].status == "RUNNING"
-  retries: 30
-  delay: 10
-
-- name: Add instance to inventory
-  add_host:
-    name: "{{ compute_instance.networkInterfaces[0].accessConfigs[0].natIP }}"
-    groups:
-      - "{{ environment }}"
-      - "{{ application | default('openclaw') }}"
-    ansible_user: "{{ base_user_name }}"
-    ansible_ssh_private_key_file: "{{ ansible_ssh_private_key_file | default('~/.ssh/id_rsa') }}"
-    instance_name: "{{ instance_name }}"
-    instance_zone: "{{ gcp_zone }}"
-    internal_ip: "{{ compute_instance.networkInterfaces[0].networkIP }}"
-    environment: "{{ environment }}"
-
-- name: Wait for SSH to be available
   wait_for:
     host: "{{ compute_instance.networkInterfaces[0].accessConfigs[0].natIP }}"
-    port: "{{ base_ssh_port }}"
+    port: 22
     delay: 10
     timeout: 300
     state: started

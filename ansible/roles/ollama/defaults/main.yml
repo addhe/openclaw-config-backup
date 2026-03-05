@@ -1,0 +1,25 @@
+---
+# Ollama Installation Role Defaults
+
+# Ollama version (leave empty for latest)
+ollama_version: ""
+
+# Ollama install directory
+ollama_install_dir: /usr/local/bin
+
+# Models to pull (list of model names - LOCAL models only, not cloud models)
+# Cloud models (e.g., glm-5:cloud) don't need to be pulled
+ollama_models: []
+
+# Service user
+ollama_user: ollama
+ollama_group: ollama
+
+# Whether to create ollama user
+ollama_create_user: true
+
+# API port
+ollama_port: 11434
+
+# Environment variables for ollama
+ollama_env: {}

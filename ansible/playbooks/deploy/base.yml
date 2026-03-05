@@ -4,10 +4,10 @@
 # This playbook applies the base role to provisioned VMs
 #
 # Usage:
-#   ansible-playbook playbooks/deploy/base.yml -e "environment=staging"
+#   ansible-playbook playbooks/deploy/base.yml -i inventory/staging/hosts.yml -e "deploy_env=staging"
 
 - name: Apply base configuration
-  hosts: "{{ environment | default('staging') }}"
+  hosts: "{{ deploy_env | default('staging') }}"
   become: true
   gather_facts: true
 

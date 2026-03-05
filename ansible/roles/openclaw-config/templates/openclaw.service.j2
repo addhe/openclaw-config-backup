@@ -10,7 +10,7 @@ Group={{ openclaw_group }}
 WorkingDirectory=/home/{{ openclaw_user }}/.openclaw
 Environment="PATH=/usr/bin:/usr/local/bin"
 EnvironmentFile=/home/{{ openclaw_user }}/.openclaw/.env
-ExecStart=/usr/bin/openclaw gateway start
+ExecStart=/usr/bin/openclaw gateway --port {{ gateway_port | default(8080) }}
 Restart=on-failure
 RestartSec=10
 

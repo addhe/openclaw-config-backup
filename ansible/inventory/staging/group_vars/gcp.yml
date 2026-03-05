@@ -8,9 +8,12 @@ gcp_project_id: "{{ vault_gcp_project_id }}"
 gcp_region: "asia-southeast2"  # Jakarta
 gcp_zone: "asia-southeast2-a"
 
-# GCP Service Account (from vault)
-gcp_service_account_email: "{{ vault_gcp_service_account_email }}"
-gcp_service_account_key: "{{ vault_gcp_service_account_key }}"
+# GCP Authentication (using Service Account Key)
+gcp_auth_kind: "serviceaccount"
+gcp_service_account_file: "/home/addheputra/openclaw-config-backup/ansible/inventory/staging/gcp-sa-key.json"
+
+# Service Account for VM instances (uses default compute SA)
+gcp_service_account_email: "361046956504-compute@developer.gserviceaccount.com"
 
 # Network
 gcp_network: "openclaw-staging-network"
@@ -23,8 +26,3 @@ gcp_common_labels:
   owner: "{{ owner }}"
   project: "{{ org_name }}"
   cost_center: "staging-infrastructure"
-
-# Tags
-gcp_common_tags:
-  - "staging"
-  - "ansible-managed"

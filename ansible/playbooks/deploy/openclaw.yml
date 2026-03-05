@@ -4,12 +4,17 @@
 # This playbook deploys OpenClaw to configured VMs
 #
 # Usage:
-#   ansible-playbook playbooks/deploy/openclaw.yml -e "environment=staging"
+#   ansible-playbook playbooks/deploy/openclaw.yml -i inventory/staging/hosts.yml -e "deploy_env=staging"
 
 - name: Deploy OpenClaw
-  hosts: "{{ environment | default('staging') }}"
+  hosts: "{{ deploy_env | default('staging') }}"
   become: true
   gather_facts: true
+
+  vars_files:
+    - "{{ playbook_dir }}/../inventory/staging/group_vars/all.yml"
+    - "{{ playbook_dir }}/../inventory/staging/group_vars/openclaw.yml"
+    - "{{ playbook_dir }}/../inventory/staging/group_vars/vault.yml"
 
   pre_tasks:
     - name: Wait for SSH
@@ -42,7 +47,7 @@
           ================================
           OpenClaw Deployment Complete!
           ================================
-          Environment: {{ environment }}
+          Environment: {{ deploy_env }}
           Gateway Port: {{ gateway_port }}
           Model: {{ openclaw_model }}
           ================================
