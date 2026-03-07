@@ -190,10 +190,12 @@ ansible-playbook playbooks/provision/openclaw-vm.yml \
 
 ### Available Base Snapshots
 
-| Snapshot | Role | Persona | Size | Creation |
-|----------|------|---------|------|----------|
-| `openclaw-worker-devops-base-stg-v2` | DevOps | Senior DevOps Engineer | 20GB | 2026-03-07 |
-| `openclaw-worker-backend-base-stg-v2` | Backend | Senior Backend Engineer | 20GB | 2026-03-07 |
+| Snapshot | Role | Persona | Size | Version |
+|----------|------|---------|------|---------|
+| `openclaw-worker-devops-base-stg-v3` | DevOps | Senior DevOps Engineer | 20GB | v3 (2026-03-07) |
+| `openclaw-worker-backend-base-stg-v3` | Backend | Senior Backend Engineer | 20GB | v3 (2026-03-07) |
+
+**v3 Changes:** Includes `auth-profiles.json` for Ollama Cloud API authentication
 
 ### Fast Provision (~2 min vs ~15 min)
 

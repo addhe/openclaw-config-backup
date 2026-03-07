@@ -28,10 +28,12 @@ Ansible infrastructure untuk provisioning dan deployment OpenClaw di GCP dengan 
 
 ### Base Snapshots
 
-| Snapshot | Role | Persona | Size |
-|----------|------|---------|------|
-| `openclaw-worker-devops-base-stg-v2` | DevOps | Senior DevOps Engineer | 20GB |
-| `openclaw-worker-backend-base-stg-v2` | Backend | Senior Backend Engineer | 20GB |
+| Snapshot | Role | Persona | Size | Creation |
+|----------|------|---------|------|----------|
+| `openclaw-worker-devops-base-stg-v3` | DevOps | Senior DevOps Engineer | 20GB | 2026-03-07 |
+| `openclaw-worker-backend-base-stg-v3` | Backend | Senior Backend Engineer | 20GB | 2026-03-07 |
+
+**Note:** v3 includes `auth-profiles.json` for Ollama Cloud API authentication.
 
 ---
 
