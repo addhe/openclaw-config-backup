@@ -6,6 +6,35 @@ Ansible infrastructure untuk provisioning dan deployment OpenClaw di GCP dengan 
 
 ---
 
+## Deployment Statistics (2026-03-07)
+
+### Timing Benchmarks
+
+| Phase | Duration | Description |
+|-------|----------|-------------|
+| Phase 1: Provision VMs | ~2 min | GCP spot instances creation |
+| Phase 2: Bootstrap | ~2 min | Base packages, SSH, UFW, fail2ban |
+| Phase 3: Deploy OpenClaw | ~7 min | Node.js, Ollama, OpenClaw, persona |
+| Phase 4: Create Snapshots | ~4 min | Preserve state for fast provisioning |
+| **TOTAL (Full Deploy)** | **~15 min** | From scratch to running |
+| **From Snapshot** | **~2 min** | Create VM + config only |
+
+### Active Workers
+
+| VM Name | Zone | IP | Role | Persona |
+|---------|------|-----|------|---------|
+| `ocl-worker-devops-001-stg` | asia-southeast2-a | 35.219.66.164 | Senior DevOps Engineer | 🛠️ |
+| `ocl-worker-backend-001-stg` | asia-southeast2-a | 35.219.3.37 | Senior Backend Engineer | ⚙️ |
+
+### Base Snapshots
+
+| Snapshot | Role | Persona | Size |
+|----------|------|---------|------|
+| `openclaw-worker-devops-base-stg-v2` | DevOps | Senior DevOps Engineer | 20GB |
+| `openclaw-worker-backend-base-stg-v2` | Backend | Senior Backend Engineer | 20GB |
+
+---
+
 ## Directory Structure
 
 ```
@@ -110,21 +139,25 @@ chmod 600 .vault_password_production
 
 ## Quick Start
 
-### Provision Staging VM
+### Provision Worker VM
+
+VM naming convention: `ocl-worker-{role}-{numeric-id}-{env}`
+
+**Available Roles:**
+- `devops`, `backend`, `frontend`, `test-engineer`, `infosec`, `pm`, `tpm`, `mobile-engineer`
 
 ```bash
-# Using default config (staging)
-ansible-playbook playbooks/provision/openclaw-vm.yml
+# Provision DevOps worker (staging)
+ansible-playbook playbooks/provision/openclaw-vm.yml \
+  -e "deploy_env=staging gcp_worker_role=devops gcp_worker_id=001"
 
-# Or explicitly
-ansible-playbook -i inventory/staging playbooks/provision/openclaw-vm.yml
-```
+# Provision Backend worker (staging)
+ansible-playbook playbooks/provision/openclaw-vm.yml \
+  -e "deploy_env=staging gcp_worker_role=backend gcp_worker_id=001"
 
-### Provision Production VM
-
-```bash
-# Using production config
-ansible-playbook -i inventory/production playbooks/provision/openclaw-vm.yml
+# Provision InfoSec worker (production)
+ansible-playbook playbooks/provision/openclaw-vm.yml \
+  -e "deploy_env=production gcp_worker_role=infosec gcp_worker_id=001"
 ```
 
 ### Full Deployment (Provision + Base + OpenClaw)

@@ -4,8 +4,11 @@
 # Default variables for GCP VM provisioning
 
 # Instance Configuration
-gcp_instance_name_prefix: "{{ org_short }}-{{ application | default('openclaw') }}-{{ env_short }}"
-gcp_instance_name_suffix: "{{ '%Y%m%d%H%M%S' | strftime }}"
+# Naming Convention: ocl-worker-{role}-{numeric-id}-{env}
+# Examples: ocl-worker-devops-001-stg, ocl-worker-backend-003-prd
+gcp_worker_role: "devops"  # Options: devops, backend, frontend, test-engineer, infosec, pm, tpm, mobile-engineer
+gcp_worker_id: "001"       # Numeric ID: 001-999
+gcp_instance_name_prefix: "{{ org_short }}-worker-{{ gcp_worker_role }}-{{ gcp_worker_id }}-{{ env_short }}"
 
 # Machine Configuration
 gcp_machine_type: "e2-medium"
@@ -53,7 +56,8 @@ gcp_instance_labels:
   environment: "{{ deploy_env }}"
   managed_by: "ansible"
   project: "{{ org_name }}"
-  application: "{{ application | default('openclaw') }}"
+  role: "{{ gcp_worker_role }}"
+  worker_id: "{{ gcp_worker_id }}"
   cost_center: "{{ deploy_env }}-infrastructure"
 
 gcp_instance_tags:

@@ -1,5 +1,6 @@
 ---
 # OpenClaw Configuration Role
+# Deploys config and persona-based identity files
 
 - name: Deploy OpenClaw config file
   template:
@@ -17,7 +18,31 @@
     group: "{{ openclaw_group }}"
     mode: '0600'
 
-- name: Deploy workspace files
+- name: Deploy SOUL.md (worker personality)
+  template:
+    src: soul.md.j2
+    dest: "/home/{{ openclaw_user }}/.openclaw/workspace/SOUL.md"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0644'
+
+- name: Deploy USER.md (worker context)
+  template:
+    src: user.md.j2
+    dest: "/home/{{ openclaw_user }}/.openclaw/workspace/USER.md"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0644'
+
+- name: Deploy IDENTITY.md (role-specific persona)
+  template:
+    src: "personas/{{ worker_personas[gcp_worker_role].file_prefix }}-identity.md.j2"
+    dest: "/home/{{ openclaw_user }}/.openclaw/workspace/IDENTITY.md"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0644'
+
+- name: Deploy static workspace files
   copy:
     src: "{{ item }}"
     dest: "/home/{{ openclaw_user }}/.openclaw/workspace/{{ item }}"
@@ -26,10 +51,7 @@
     mode: '0644'
   loop:
     - AGENTS.md
-    - SOUL.md
-    - USER.md
     - TOOLS.md
-    - IDENTITY.md
     - HEARTBEAT.md
 
 - name: Deploy systemd service

@@ -20,9 +20,10 @@ gcp_network: "openclaw-staging-network"
 gcp_subnetwork: "openclaw-staging-subnet"
 
 # Labels (for resource management)
+# Worker roles: devops, backend, frontend, test-engineer, infosec, pm, tpm, mobile-engineer
 gcp_common_labels:
-  environment: "staging"
-  managed_by: "ansible"
+  env: "stg"
+  managed_by: "openclaw"
   owner: "{{ owner }}"
   project: "{{ org_name }}"
   cost_center: "staging-infrastructure"

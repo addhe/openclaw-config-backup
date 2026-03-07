@@ -114,7 +114,7 @@
 
 - name: Generate instance name
   set_fact:
-    instance_name: "{{ gcp_instance_name_prefix }}-{{ '%Y%m%d%H%M%S' | strftime }}-{{ 1000 | random }}"
+    instance_name: "{{ gcp_instance_name_prefix }}"
 
 - name: Display instance configuration
   debug:

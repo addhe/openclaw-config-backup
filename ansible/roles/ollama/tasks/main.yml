@@ -116,3 +116,46 @@
 - name: Display installed models
   debug:
     var: ollama_models_list.stdout_lines
+
+# ===========================================
+# Ollama Cloud API Configuration
+# ===========================================
+
+- name: Create ollama config directory
+  file:
+    path: "{{ ollama_env_file | dirname }}"
+    state: directory
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Configure Ollama Cloud API key
+  template:
+    src: ollama-environment.j2
+    dest: "{{ ollama_env_file }}"
+    owner: root
+    group: root
+    mode: '0600'
+  when: ollama_cloud_enabled | bool and ollama_cloud_api_key | length > 0
+  no_log: true
+
+- name: Update ollama service with EnvironmentFile
+  lineinfile:
+    path: /etc/systemd/system/ollama.service
+    insertafter: '^Environment='
+    line: 'EnvironmentFile={{ ollama_env_file }}'
+    state: present
+  when: ollama_cloud_enabled | bool and ollama_cloud_api_key | length > 0
+  notify: Restart ollama
+
+- name: Display Ollama Cloud configuration
+  debug:
+    msg: |
+      ========================================
+      Ollama Cloud API Configuration
+      ========================================
+      Enabled: {{ ollama_cloud_enabled }}
+      Host: {{ ollama_cloud_host }}
+      Model: {{ ollama_cloud_model }}
+      API Key: {{ 'configured' if ollama_cloud_api_key | length > 0 else 'not set' }}
+      ========================================

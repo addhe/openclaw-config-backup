@@ -48,3 +48,12 @@ devices/
 
 # Identity sensitive files
 identity/
+# Ansible vault files with secrets
+**/inventory/*/group_vars/vault.yml
+**/inventory/*/host_vars/*/vault.yml
+.vault_password*
+*.vault
+
+# GCP service account keys
+**/gcp-sa-key.json
+**/*-sa-key.json

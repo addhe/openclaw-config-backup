@@ -2,7 +2,18 @@
 
 ## 🎯 Objective
 
-Deploy OpenClaw on a VM using Ansible with secrets stored in Ansible Vault.
+Deploy OpenClaw worker VMs on GCP using Ansible with secrets stored in Ansible Vault.
+
+## VM Naming Convention
+
+```
+ocl-worker-{role}-{numeric-id}-{env}
+```
+
+**Examples:**
+- `ocl-worker-devops-001-stg` - DevOps worker (staging)
+- `ocl-worker-backend-002-stg` - Backend worker (staging)
+- `ocl-worker-infosec-001-prd` - InfoSec worker (production)
 
 ---
 
@@ -109,22 +120,23 @@ vault_openai_api_key: "sk-proj-rzi6M1g5Iu..."
 
 ```bash
 # 1. Create vault password file (keep secure!)
-echo "YOUR_VAULT_PASSWORD" > .vault_password
-chmod 600 .vault_password
+echo "YOUR_VAULT_PASSWORD" > .vault_password_staging
+chmod 600 .vault_password_staging
 
 # 2. Create/edit encrypted vault
-ansible-vault create vault/secrets.yml
+ansible-vault create inventory/staging/group_vars/vault.yml
 # or edit existing
-ansible-vault edit vault/secrets.yml
+ansible-vault edit inventory/staging/group_vars/vault.yml
 
-# 3. Run provisioning
-ansible-playbook -i inventory/hosts.yml playbooks/provision.yml --vault-password-file .vault_password
+# 3. Provision worker VM (example: devops worker)
+ansible-playbook playbooks/provision/openclaw-vm.yml \
+  -e "deploy_env=staging gcp_worker_role=devops gcp_worker_id=001"
 
 # 4. Run deployment
-ansible-playbook -i inventory/hosts.yml playbooks/deploy.yml --vault-password-file .vault_password
+ansible-playbook -i inventory/staging playbooks/deploy.yml
 
 # 5. Or run everything
-ansible-playbook -i inventory/hosts.yml playbooks/site.yml --vault-password-file .vault_password
+ansible-playbook -i inventory/staging playbooks/site.yml
 ```
 
 ---

@@ -6,8 +6,24 @@
 2. [Initial Setup](#initial-setup)
 3. [Provisioning](#provisioning)
 4. [Deployment](#deployment)
-5. [Operations](#operations)
-6. [Troubleshooting](#troubleshooting)
+5. [Fast Provisioning from Snapshots](#fast-provisioning-from-snapshots)
+6. [Operations](#operations)
+7. [Troubleshooting](#troubleshooting)
+
+---
+
+## Deployment Statistics (2026-03-07)
+
+### Timing Benchmarks
+
+| Phase | Duration | Description |
+|-------|----------|-------------|
+| Phase 1: Provision VMs | ~2 min | GCP spot instances creation |
+| Phase 2: Bootstrap | ~2 min | Base packages, SSH, UFW, fail2ban |
+| Phase 3: Deploy OpenClaw | ~7 min | Node.js, Ollama, OpenClaw, persona |
+| Phase 4: Create Snapshots | ~4 min | Preserve state for fast provisioning |
+| **TOTAL (Full Deploy)** | **~15 min** | From scratch to running |
+| **From Snapshot** | **~2 min** | Create VM + config only |
 
 ---
 
@@ -74,15 +90,38 @@ ansible-vault create inventory/staging/group_vars/vault.yml
 Fill with:
 ```yaml
 ---
+# GCP Configuration
 vault_gcp_project_id: "your-project-id"
-vault_gcp_service_account_email: "ansible@your-project-id.iam.gserviceaccount.com"
-vault_gcp_service_account_key: "/path/to/key.json"
-vault_telegram_bot_token: "YOUR_BOT_TOKEN"
+vault_gcp_auth_kind: "application"
+
+# Telegram Bot Tokens (per worker)
+# Each worker needs a unique bot token
+vault_telegram_bot_tokens:
+  devops:
+    "001": "DEVOPS_BOT_TOKEN_001"
+    "002": "DEVOPS_BOT_TOKEN_002"
+  backend:
+    "001": "BACKEND_BOT_TOKEN_001"
+    "002": "BACKEND_BOT_TOKEN_002"
+  frontend:
+    "001": "FRONTEND_BOT_TOKEN_001"
+  # Add more roles as needed
+
+# Telegram Allowed Users (whitelist)
 vault_telegram_allowed_users:
-  - "@BroAwn"
-vault_gateway_token: "YOUR_GATEWAY_TOKEN"
-vault_openai_api_key: "YOUR_OPENAI_API_KEY"
+  - 319535690  # @BroAwn numeric ID
+
+# Ollama Cloud API Key
+vault_ollama_cloud_api_key: "YOUR_OLLAMA_CLOUD_API_KEY"
+
+# Gateway Token (optional)
+vault_gateway_token: ""
+
+# OpenAI API Key (optional)
+vault_openai_api_key: ""
 ```
+
+**Important:** Each worker role+ID combination needs its own Telegram bot token. Create bots via [@BotFather](https://t.me/botfather) and add tokens to `vault_telegram_bot_tokens` above.
 
 ### 4. Configure GCP Credentials
 
@@ -106,36 +145,129 @@ ansible-inventory -i inventory/staging/gcp_compute.yml --list
 
 ## Provisioning
 
-### Provision Staging VM
+### Provision Worker VM
+
+VM naming convention: `ocl-worker-{role}-{numeric-id}-{env}`
+
+**Available Roles:**
+- `devops` - DevOps / Platform Engineer
+- `backend` - Backend Engineer
+- `frontend` - Frontend Engineer
+- `test-engineer` - QA / Test Engineer
+- `infosec` - Security Engineer
+- `pm` - Product Manager
+- `tpm` - Technical Program Manager
+- `mobile-engineer` - Mobile Developer
 
 ```bash
-# Basic provision
-ansible-playbook -i inventory/staging playbooks/provision/openclaw-vm.yml
+# Provision DevOps worker (staging)
+ansible-playbook playbooks/provision/openclaw-vm.yml \
+  -e "deploy_env=staging gcp_worker_role=devops gcp_worker_id=001"
 
-# With extra variables
-ansible-playbook -i inventory/staging playbooks/provision/openclaw-vm.yml \
+# Provision Backend worker (staging)
+ansible-playbook playbooks/provision/openclaw-vm.yml \
+  -e "deploy_env=staging gcp_worker_role=backend gcp_worker_id=001"
+
+# Provision InfoSec worker (production)
+ansible-playbook playbooks/provision/openclaw-vm.yml \
+  -e "deploy_env=production gcp_worker_role=infosec gcp_worker_id=001"
+
+# With custom machine type
+ansible-playbook playbooks/provision/openclaw-vm.yml \
+  -e "deploy_env=staging gcp_worker_role=devops gcp_worker_id=001" \
   -e "gcp_machine_type_spot=e2-standard-2" \
   -e "gcp_disk_size_gb=50"
 
 # Dry run
-ansible-playbook -i inventory/staging playbooks/provision/openclaw-vm.yml --check
+ansible-playbook playbooks/provision/openclaw-vm.yml \
+  -e "deploy_env=staging gcp_worker_role=devops gcp_worker_id=001" \
+  --check
 ```
 
-### Provision Production VM
+---
+
+## Fast Provisioning from Snapshots
+
+### Available Base Snapshots
+
+| Snapshot | Role | Persona | Size | Creation |
+|----------|------|---------|------|----------|
+| `openclaw-worker-devops-base-stg-v2` | DevOps | Senior DevOps Engineer | 20GB | 2026-03-07 |
+| `openclaw-worker-backend-base-stg-v2` | Backend | Senior Backend Engineer | 20GB | 2026-03-07 |
+
+### Fast Provision (~2 min vs ~15 min)
 
 ```bash
-# Using production config
-ansible-playbook -i inventory/production playbooks/provision/openclaw-vm.yml
+# Step 1: Create VM from snapshot (~1 min)
+gcloud compute instances create ocl-worker-devops-002-stg \
+  --project=awanmasterpiece \
+  --zone=asia-southeast2-a \
+  --machine-type=e2-medium \
+  --source-snapshot=openclaw-worker-devops-base-stg-v2 \
+  --tags=staging \
+  --labels="environment=staging,managed_by=ansible,role=devops"
+
+# Step 2: Add to inventory
+# Update inventory/staging/hosts.yml with new IP
+
+# Step 3: Deploy only config (~1 min)
+ansible-playbook playbooks/deploy/openclaw.yml \
+  -i inventory/staging/hosts.yml \
+  -e "deploy_env=staging gcp_worker_role=devops gcp_worker_id=002" \
+  --limit=ocl-worker-devops-002-stg \
+  --tags=config
 ```
 
-### Expected Output
+### What's Included in Snapshots
+
+- Ubuntu 22.04 LTS
+- Node.js v22.x
+- OpenClaw installed
+- Ollama installed with local model (llama3.2:1b)
+- Base persona files (AGENTS.md, TOOLS.md, HEARTBEAT.md)
+- Systemd service configured
+- UFW firewall configured
+- SSH hardened
+
+### What's NOT Included (must redeploy)
+
+- `IDENTITY.md` - Role-specific persona
+- `SOUL.md` - Worker personality
+- `USER.md` - Worker context
+- `openclaw.json` - Config with unique bot token
+- `.env` - Environment variables with Ollama API key
+
+### Snapshot Naming Convention
 
 ```
-PLAY [Provision OpenClaw VM] **************************************************
+openclaw-worker-{role}-base-{env}-v{version}
+
+Examples:
+- openclaw-worker-devops-base-stg-v2
+- openclaw-worker-backend-base-stg-v2
+- openclaw-worker-frontend-base-prd-v1
+```
+
+---
+
+## Expected Output
+
+```
+PLAY [Provision OpenClaw Worker VM] *******************************************
 
 TASK [Display environment] ****************************************************
 ok: [localhost] => {
-    "msg": "Provisioning for environment: staging"
+    "msg": "Provisioning for environment: staging, project: awanmasterpiece"
+}
+
+TASK [Validate worker role] ***************************************************
+ok: [localhost] => {
+    "msg": "Worker role validated: devops"
+}
+
+TASK [Validate worker ID] *****************************************************
+ok: [localhost] => {
+    "msg": "Worker ID validated: 001"
 }
 
 ...
@@ -143,15 +275,15 @@ ok: [localhost] => {
 TASK [Display created instance] ***********************************************
 ok: [localhost] => {
     "msg": [
-        "Instance created: ocl-openclaw-stg-20260304220000-1234",
-        "External IP: 34.101.xxx.xxx",
+        "Instance created: ocl-worker-devops-001-stg",
+        "External IP: 34.128.xxx.xxx",
         "Internal IP: 10.20.0.2",
         "Status: RUNNING"
     ]
 }
 
 PLAY RECAP ********************************************************************
-localhost                  : ok=25   changed=12   unreachable=0    failed=0
+localhost                  : ok=28   changed=12   unreachable=0    failed=0
 ```
 
 ---
@@ -341,6 +473,61 @@ gcloud compute instances describe INSTANCE_NAME --zone=asia-southeast2-a
 gcloud compute instances get-serial-port-output INSTANCE_NAME --zone=asia-southeast2-a
 ```
 
+#### allowFrom Empty in Config
+
+```
+Error: Telegram pairing required even though allowFrom is set in vault
+```
+
+**Cause:** Variable `telegram_allowed_users` not rendering correctly in Jinja2 template.
+
+**Solution:**
+```bash
+# Manually update config on worker
+ssh -i ~/.ssh/shannon-gcp addheputra@WORKER_IP
+sudo -u openclaw sed -i 's/"allowFrom": \[\]/"allowFrom": [319535690]/' /home/openclaw/.openclaw/openclaw.json
+sudo systemctl restart openclaw
+```
+
+**Permanent Fix:** Update `roles/openclaw-config/templates/openclaw.json.j2`:
+```jinja2
+"allowFrom": {{ vault_telegram_allowed_users | to_json }},
+```
+
+#### Config File Corrupted (0 bytes)
+
+```
+Error: Config invalid or empty
+```
+
+**Cause:** Config file may be overwritten with empty content during deployment.
+
+**Solution:**
+```bash
+# Restore from backup
+ssh -i ~/.ssh/shannon-gcp addheputra@WORKER_IP
+sudo -u openclaw cp /home/openclaw/.openclaw/openclaw.json.bak /home/openclaw/.openclaw/openclaw.json
+sudo systemctl restart openclaw
+```
+
+#### Wrong Persona Deployed
+
+```
+Error: Worker shows wrong role in IDENTITY.md
+```
+
+**Cause:** Deployed with wrong `gcp_worker_role` parameter.
+
+**Solution:**
+```bash
+# Redeploy with correct role
+ansible-playbook playbooks/deploy/openclaw.yml \
+  -i inventory/staging/hosts.yml \
+  -e "deploy_env=staging gcp_worker_role=backend gcp_worker_id=001" \
+  --limit=ocl-worker-backend-001-stg \
+  --tags=config
+```
+
 ---
 
 ## Quick Reference
@@ -349,16 +536,55 @@ gcloud compute instances get-serial-port-output INSTANCE_NAME --zone=asia-southe
 
 | Task | Command |
 |------|---------|
-| Provision Staging | `ansible-playbook -i inventory/staging playbooks/provision/openclaw-vm.yml` |
-| Provision Production | `ansible-playbook -i inventory/production playbooks/provision/openclaw-vm.yml` |
+| Provision Worker (Staging) | `ansible-playbook playbooks/provision/openclaw-vm.yml -e "deploy_env=staging gcp_worker_role=devops gcp_worker_id=001"` |
+| Provision Worker (Production) | `ansible-playbook playbooks/provision/openclaw-vm.yml -e "deploy_env=production gcp_worker_role=infosec gcp_worker_id=001"` |
 | Full Deploy Staging | `ansible-playbook -i inventory/staging playbooks/site.yml` |
 | Full Deploy Production | `ansible-playbook -i inventory/production playbooks/site.yml` |
 | Apply Base Only | `ansible-playbook -i inventory/staging playbooks/deploy/base.yml` |
 | Deploy OpenClaw Only | `ansible-playbook -i inventory/staging playbooks/deploy/openclaw.yml` |
-| List Instances | `ansible-inventory -i inventory/staging/gcp_compute.yml --list` |
+| List Instances | `gcloud compute instances list --project=awanmasterpiece` |
 | Ping All | `ansible -i inventory/staging/gcp_compute.yml all -m ping` |
 | Edit Vault Staging | `ansible-vault edit inventory/staging/group_vars/vault.yml` |
 | Edit Vault Production | `ansible-vault edit inventory/production/group_vars/vault.yml` |
+
+### Worker Roles
+
+| Role | Description | Persona |
+|------|-------------|---------|
+| `devops` | DevOps / Platform Engineer | 🛠️ Senior DevOps Engineer |
+| `backend` | Backend Engineer | ⚙️ Senior Backend Engineer |
+| `frontend` | Frontend Engineer | 🎨 Senior Frontend Engineer |
+| `test-engineer` | QA / Test Engineer | 🧪 Senior Test Engineer |
+| `infosec` | Security Engineer | 🔒 Senior Security Engineer |
+| `pm` | Product Manager | 📋 Product Manager |
+| `tpm` | Technical Program Manager | 📅 Technical Program Manager |
+| `mobile-engineer` | Mobile Developer | 📱 Senior Mobile Engineer |
+
+### Active Workers (Staging)
+
+| VM Name | Role | IP | SSH Access |
+|---------|------|-----|-------------|
+| `ocl-worker-devops-001-stg` | DevOps | 35.219.66.164 | `ssh -i ~/.ssh/shannon-gcp addheputra@35.219.66.164` |
+| `ocl-worker-backend-001-stg` | Backend | 35.219.3.37 | `ssh -i ~/.ssh/shannon-gcp addheputra@35.219.3.37` |
+
+### SSH Quick Commands
+
+```bash
+# DevOps worker
+ssh -i ~/.ssh/shannon-gcp addheputra@35.219.66.164
+
+# Backend worker
+ssh -i ~/.ssh/shannon-gcp addheputra@35.219.3.37
+
+# Check OpenClaw status
+ssh -i ~/.ssh/shannon-gcp addheputra@WORKER_IP "sudo systemctl status openclaw"
+
+# View logs
+ssh -i ~/.ssh/shannon-gcp addheputra@WORKER_IP "sudo journalctl -u openclaw -n 50"
+
+# Check config
+ssh -i ~/.ssh/shannon-gcp addheputra@WORKER_IP "sudo cat /home/openclaw/.openclaw/openclaw.json | grep -A5 telegram"
+```
 
 ---
 
