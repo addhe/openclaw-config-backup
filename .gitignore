@@ -57,3 +57,6 @@ identity/
 # GCP service account keys
 **/gcp-sa-key.json
 **/*-sa-key.json
+
+# Host-specific secrets (bot tokens per worker)
+**/inventory/*/host_vars/
