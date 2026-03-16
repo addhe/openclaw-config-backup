@@ -349,21 +349,35 @@ gcloud compute instances get-serial-port-output INSTANCE_NAME --zone=asia-southe
 
 | Task | Command |
 |------|---------|
+| Deploy Worker from Snapshot | See [WORKER_DEPLOYMENT.md](WORKER_DEPLOYMENT.md) |
 | Provision Staging | `ansible-playbook -i inventory/staging playbooks/provision/openclaw-vm.yml` |
 | Provision Production | `ansible-playbook -i inventory/production playbooks/provision/openclaw-vm.yml` |
 | Full Deploy Staging | `ansible-playbook -i inventory/staging playbooks/site.yml` |
 | Full Deploy Production | `ansible-playbook -i inventory/production playbooks/site.yml` |
 | Apply Base Only | `ansible-playbook -i inventory/staging playbooks/deploy/base.yml` |
 | Deploy OpenClaw Only | `ansible-playbook -i inventory/staging playbooks/deploy/openclaw.yml` |
-| List Instances | `ansible-inventory -i inventory/staging/gcp_compute.yml --list` |
-| Ping All | `ansible -i inventory/staging/gcp_compute.yml all -m ping` |
+| List Instances | `gcloud compute instances list --filter="name:ocl-worker"` |
+| SSH to Worker | `gcloud compute ssh ocl-worker-devops-001-stg --zone=asia-southeast2-a` |
 | Edit Vault Staging | `ansible-vault edit inventory/staging/group_vars/vault.yml` |
 | Edit Vault Production | `ansible-vault edit inventory/production/group_vars/vault.yml` |
+
+### Worker Management
+
+| Task | Command |
+|------|---------|
+| List Workers | `gcloud compute instances list --filter="name:ocl-worker"` |
+| Start Worker | `gcloud compute instances start ocl-worker-devops-001-stg --zone=asia-southeast2-a` |
+| Stop Worker | `gcloud compute instances stop ocl-worker-devops-001-stg --zone=asia-southeast2-a` |
+| Delete Worker | `gcloud compute instances delete ocl-worker-devops-001-stg --zone=asia-southeast2-a --quiet` |
+| Check OpenClaw Status | `gcloud compute ssh WORKER_NAME --zone=asia-southeast2-a --command="sudo systemctl status openclaw"` |
+| View Worker Logs | `gcloud compute ssh WORKER_NAME --zone=asia-southeast2-a --command="sudo journalctl -u openclaw -n 50"` |
+| Update Bot Token | `gcloud compute ssh WORKER_NAME --command="sudo sed -i 's/OLD_TOKEN/NEW_TOKEN/g' /home/openclaw/.openclaw/openclaw.json && sudo systemctl restart openclaw"` |
 
 ---
 
 ## Support
 
 - **Documentation:** `docs/` directory
+- **Worker Deployment:** [WORKER_DEPLOYMENT.md](WORKER_DEPLOYMENT.md)
 - **Issues:** [GitHub Issues](https://github.com/addhe/openclaw-config-backup/issues)
 - **Logs:** Check `/var/log/ansible/` on target hosts

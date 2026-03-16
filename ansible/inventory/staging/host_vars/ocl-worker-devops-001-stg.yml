@@ -1,0 +1,17 @@
+---
+# Host-specific variables for ocl-worker-devops-001-stg
+# =====================================
+
+ansible_host: 35.219.42.250
+instance_name: ocl-worker-devops-001-stg
+instance_zone: asia-southeast2-a
+
+# Role: DevOps Worker
+worker_role: devops
+
+# Telegram Bot Token
+telegram_bot_token: "8697279396:AAGStoT9cDZ60dREfexyu_iE94pOIdTKjjk"
+
+# Persona - Senior DevOps Engineer
+persona_name: "Senior DevOps Engineer"
+persona_focus: "CI/CD pipelines, infrastructure automation, monitoring, cloud platforms, container orchestration"

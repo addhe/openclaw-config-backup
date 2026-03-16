@@ -1,0 +1,17 @@
+---
+# Host-specific variables for ocl-worker-backend-001-stg
+# =====================================
+
+ansible_host: 35.219.3.37
+instance_name: ocl-worker-backend-001-stg
+instance_zone: asia-southeast2-a
+
+# Role: Backend Worker
+worker_role: backend
+
+# Telegram Bot Token
+telegram_bot_token: "8721769766:AAEvYX9wp5oCfvr1-zNCI5js3l_H0XzBNOg"
+
+# Persona - Senior Backend Engineer
+persona_name: "Senior Backend Engineer"
+persona_focus: "API development, database optimization, microservices architecture, performance tuning"

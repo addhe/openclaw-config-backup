@@ -11,7 +11,7 @@ WorkingDirectory=/home/{{ openclaw_user }}/.openclaw
 Environment="PATH=/usr/bin:/usr/local/bin"
 EnvironmentFile=/home/{{ openclaw_user }}/.openclaw/.env
 ExecStart=/usr/bin/openclaw gateway start
-Restart=on-failure
+Restart=always
 RestartSec=10
 
 # Security
