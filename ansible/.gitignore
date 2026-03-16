@@ -45,7 +45,17 @@ logs/
 # Credentials - NEVER COMMIT
 *.key
 *.pem
-*.json
-!package.json
 credentials/
 service-account*.json
+gcp-sa-key.json
+*.json
+!package.json
+gcp-sa-key.json
+
+# Vault files with secrets - NEVER COMMIT
+inventory/*/group_vars/vault.yml
+**/vault.yml
+
+# Keep host_vars but not secrets
+!inventory/*/host_vars/*.yml
+inventory/*/host_vars/vault.ymlinventory/staging/gcp-sa-key.json

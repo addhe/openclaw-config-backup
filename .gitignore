@@ -48,3 +48,11 @@ devices/
 
 # Identity sensitive files
 identity/
+
+# Ansible vault files (encrypted secrets)
+**/vault.yml
+vault.yml
+
+# Ansible vault files (encrypted secrets)
+vault.yml
+**/vault.yml

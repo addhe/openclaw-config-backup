@@ -1,5 +1,18 @@
 ---
-# OpenClaw Configuration Role
+# MasterControl Configuration Role
+# Deploys IrishEcho MasterControl bot
+
+- name: Create OpenClaw directory structure
+  file:
+    path: "/home/{{ openclaw_user }}/.openclaw/{{ item }}"
+    state: directory
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0700'
+  loop:
+    - ""
+    - "agents/main/agent"
+    - "workspace/memory"
 
 - name: Deploy OpenClaw config file
   template:
@@ -31,16 +44,16 @@
     - TOOLS.md
     - HEARTBEAT.md
 
-- name: Deploy MEMORY.md with owner configuration
-  template:
-    src: MEMORY.md.j2
+- name: Deploy MEMORY.md
+  copy:
+    src: MEMORY.md
     dest: "/home/{{ openclaw_user }}/.openclaw/workspace/MEMORY.md"
     owner: "{{ openclaw_user }}"
     group: "{{ openclaw_group }}"
     mode: '0644'
     force: no
 
-- name: Deploy IDENTITY.md template
+- name: Deploy IDENTITY.md
   copy:
     src: IDENTITY.md
     dest: "/home/{{ openclaw_user }}/.openclaw/workspace/IDENTITY.md"
@@ -49,25 +62,25 @@
     mode: '0644'
     force: no
 
-- name: Deploy worker identity startup script
+- name: Deploy startup script
   copy:
-    src: startup-script.sh
-    dest: /usr/local/bin/openclaw-worker-startup.sh
+    src: mastercontrol-startup.sh
+    dest: /usr/local/bin/mastercontrol-startup.sh
     owner: root
     group: root
     mode: '0755'
 
-- name: Deploy worker identity systemd service
+- name: Deploy identity systemd service
   copy:
-    src: worker-identity.service
-    dest: /etc/systemd/system/openclaw-worker-identity.service
+    src: mastercontrol-identity.service
+    dest: /etc/systemd/system/mastercontrol-identity.service
     owner: root
     group: root
     mode: '0644'
 
-- name: Enable worker identity service
+- name: Enable identity service
   systemd:
-    name: openclaw-worker-identity
+    name: mastercontrol-identity
     enabled: yes
     daemon_reload: yes
 
@@ -109,3 +122,23 @@
 - name: Display service status
   debug:
     var: service_status.stdout_lines
+
+- name: Display completion message
+  debug:
+    msg: |
+      ================================
+      IrishEcho MasterControl Deployed!
+      ================================
+      Instance: {{ inventory_hostname }}
+      Environment: {{ environment | default('staging') }}
+      Gateway Port: {{ gateway_port }}
+      Bot Token: {{ telegram_bot_token[:20] }}...
+      Owner: @BroAwn (ID: {{ owner_telegram_id }})
+      ================================
+      Access Policy:
+      • DM ONLY - No group access
+      • OWNER ONLY - Single user
+      ================================
+      Test:
+      curl http://localhost:{{ gateway_port }}/status
+      ================================

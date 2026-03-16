@@ -155,24 +155,27 @@ gcloud compute disks snapshot ocl-worker-devops-001-stg \
 
 ## Bot Token Management
 
-### Worker 001 (Base Image)
-Bot tokens are embedded in base images:
-- **DevOps Worker 001**: `8697279396:AAGStoT9cDZ60dREfexyu_iE94pOIdTKjjk`
-- **Backend Worker 001**: `8721769766:AAEvYX9wp5oCfvr1-zNCI5js3l_H0XzBNOg`
+### All Tokens in Vault
+**IMPORTANT**: All bot tokens are stored in encrypted vault files. Never commit tokens to git!
 
-### Worker 002+ (New Workers)
-**IMPORTANT**: Each new worker needs a unique bot token!
-
-1. Create new bot via [@BotFather](https://t.me/BotFather)
-2. Copy the bot token
-3. After VM boots, update the token:
 ```bash
-gcloud compute ssh ocl-worker-devops-002-stg --zone=asia-southeast2-a \
-  --command="sudo sed -i 's/YOUR_TOKEN/NEW_TOKEN/g' /home/openclaw/.openclaw/openclaw.json && sudo systemctl restart openclaw"
+# View/edit vault (requires vault password)
+ansible-vault edit inventory/staging/group_vars/vault.yml
 ```
 
-### Recommended: Token Rotation Strategy
+### Adding New Bot Token
+1. Create new bot via [@BotFather](https://t.me/BotFather)
+2. Add token to vault:
+```bash
+ansible-vault edit inventory/staging/group_vars/vault.yml
+# Add: vault_telegram_bot_tokens.devops["002"] = "YOUR_NEW_TOKEN"
+```
+3. Deploy with Ansible:
+```bash
+ansible-playbook playbooks/deploy/openclaw.yml -i inventory/staging/hosts.yml --ask-vault-pass
+```
 
+### Token Rotation Strategy
 For production, consider:
 1. Use GCP Secret Manager for bot tokens
 2. Fetch token at startup from Secret Manager

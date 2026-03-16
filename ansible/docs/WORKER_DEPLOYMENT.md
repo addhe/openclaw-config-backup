@@ -88,8 +88,8 @@ Each worker **MUST** have a unique Telegram bot token. Using the same token acro
 
 | Worker | Bot Token | Notes |
 |--------|-----------|-------|
-| `ocl-worker-devops-001-stg` | `8697279396:AAGSto...` | Embedded in base image |
-| `ocl-worker-backend-001-stg` | `8721769766:AAEvYX...` | Embedded in base image |
+| `ocl-worker-devops-001-stg` | See vault.yml | Embedded in base image |
+| `ocl-worker-backend-001-stg` | See vault.yml | Embedded in base image |
 | `ocl-worker-devops-002-stg` | **NEW TOKEN NEEDED** | Create via @BotFather |
 | `ocl-worker-backend-002-stg` | **NEW TOKEN NEEDED** | Create via @BotFather |
 
@@ -121,7 +121,7 @@ sudo systemctl restart openclaw
 ```bash
 # Method 2: Use sed to replace token
 NEW_TOKEN="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz"
-OLD_TOKEN="8697279396:AAGStoT9cDZ60dREfexyu_iE94pOIdTKjjk"
+OLD_TOKEN="<TOKEN_FROM_VAULT>"
 
 gcloud compute ssh ocl-worker-devops-002-stg --zone=asia-southeast2-a \
   --command="sudo sed -i 's/${OLD_TOKEN}/${NEW_TOKEN}/g' /home/openclaw/.openclaw/openclaw.json && sudo systemctl restart openclaw"
@@ -199,7 +199,7 @@ gcloud compute ssh ocl-worker-devops-002-stg --zone=asia-southeast2-a --command=
 ```bash
 # Replace with new token
 NEW_TOKEN="YOUR_NEW_BOT_TOKEN"
-OLD_TOKEN="8697279396:AAGStoT9cDZ60dREfexyu_iE94pOIdTKjjk"
+OLD_TOKEN="<TOKEN_FROM_VAULT>"
 
 gcloud compute ssh ocl-worker-devops-002-stg --zone=asia-southeast2-a \
   --command="sudo sed -i 's/${OLD_TOKEN}/${NEW_TOKEN}/g' /home/openclaw/.openclaw/openclaw.json && sudo systemctl restart openclaw"

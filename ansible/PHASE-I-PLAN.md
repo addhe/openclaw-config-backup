@@ -77,9 +77,9 @@ openclaw-config-backup/
 ### Vault File Structure:
 ```yaml
 # vault/secrets.yml (encrypted)
-vault_telegram_bot_token: "7748465090:AAEPQiL3K_..."
-vault_gateway_token: "d0a6eebd8ae7be572fc832df..."
-vault_openai_api_key: "sk-proj-rzi6M1g5Iu..."
+vault_telegram_bot_token: "YOUR_BOT_TOKEN"
+vault_gateway_token: "YOUR_GATEWAY_TOKEN"
+vault_openai_api_key: "YOUR_API_KEY"
 ```
 
 ---
