@@ -51,7 +51,7 @@ if [ ! -f "$VAULT_FILE" ]; then
 
 vault_mastercontrol_bot_token: "YOUR_BOT_TOKEN_HERE"
 vault_mastercontrol_gateway_token: "GENERATE_WITH_openssl_rand_hex_24"
-vault_sensitive_password: "Putra"
+vault_sensitive_password: "CHANGE_ME_TO_SECURE_PASSWORD"
 vault_ollama_api_key: "YOUR_OLLAMA_API_KEY"
 EOF
     echo -e "${YELLOW}Please edit $VAULT_FILE with your secrets:${NC}"

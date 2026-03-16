@@ -43,7 +43,7 @@ sensitive_password: "{{ vault_sensitive_password }}"
 
 ```yaml
 # Anti-Takeover Security
-vault_sensitive_password: "Putra"  # CHANGE THIS IN PRODUCTION!
+vault_sensitive_password: "CHANGE_ME"  # Set your own secure password!
 ```
 
 ## Protection Rules

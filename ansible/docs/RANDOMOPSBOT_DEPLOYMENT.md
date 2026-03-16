@@ -145,7 +145,7 @@ vault_telegram_bot_token: "YOUR_BOT_TOKEN"
 vault_telegram_allowed_users:
   - "@BroAwn"
 vault_gateway_token: "YOUR_GATEWAY_TOKEN"
-vault_sensitive_password: "Putra"
+vault_sensitive_password: "CHANGE_ME"
 ```
 
 ## Workspace Files
