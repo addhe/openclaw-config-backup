@@ -538,60 +538,36 @@ ansible-playbook playbooks/deploy/openclaw.yml \
 
 | Task | Command |
 |------|---------|
-| Provision Worker (Staging) | `ansible-playbook playbooks/provision/openclaw-vm.yml -e "deploy_env=staging gcp_worker_role=devops gcp_worker_id=001"` |
-| Provision Worker (Production) | `ansible-playbook playbooks/provision/openclaw-vm.yml -e "deploy_env=production gcp_worker_role=infosec gcp_worker_id=001"` |
+| Deploy Worker from Snapshot | See [WORKER_DEPLOYMENT.md](WORKER_DEPLOYMENT.md) |
+| Provision Staging | `ansible-playbook -i inventory/staging playbooks/provision/openclaw-vm.yml` |
+| Provision Production | `ansible-playbook -i inventory/production playbooks/provision/openclaw-vm.yml` |
 | Full Deploy Staging | `ansible-playbook -i inventory/staging playbooks/site.yml` |
 | Full Deploy Production | `ansible-playbook -i inventory/production playbooks/site.yml` |
 | Apply Base Only | `ansible-playbook -i inventory/staging playbooks/deploy/base.yml` |
 | Deploy OpenClaw Only | `ansible-playbook -i inventory/staging playbooks/deploy/openclaw.yml` |
-| List Instances | `gcloud compute instances list --project=awanmasterpiece` |
-| Ping All | `ansible -i inventory/staging/gcp_compute.yml all -m ping` |
+| List Instances | `gcloud compute instances list --filter="name:ocl-worker"` |
+| SSH to Worker | `gcloud compute ssh ocl-worker-devops-001-stg --zone=asia-southeast2-a` |
 | Edit Vault Staging | `ansible-vault edit inventory/staging/group_vars/vault.yml` |
 | Edit Vault Production | `ansible-vault edit inventory/production/group_vars/vault.yml` |
 
-### Worker Roles
+### Worker Management
 
-| Role | Description | Persona |
-|------|-------------|---------|
-| `devops` | DevOps / Platform Engineer | 🛠️ Senior DevOps Engineer |
-| `backend` | Backend Engineer | ⚙️ Senior Backend Engineer |
-| `frontend` | Frontend Engineer | 🎨 Senior Frontend Engineer |
-| `test-engineer` | QA / Test Engineer | 🧪 Senior Test Engineer |
-| `infosec` | Security Engineer | 🔒 Senior Security Engineer |
-| `pm` | Product Manager | 📋 Product Manager |
-| `tpm` | Technical Program Manager | 📅 Technical Program Manager |
-| `mobile-engineer` | Mobile Developer | 📱 Senior Mobile Engineer |
-
-### Active Workers (Staging)
-
-| VM Name | Role | IP | SSH Access |
-|---------|------|-----|-------------|
-| `ocl-worker-devops-001-stg` | DevOps | 35.219.66.164 | `ssh -i ~/.ssh/shannon-gcp addheputra@35.219.66.164` |
-| `ocl-worker-backend-001-stg` | Backend | 35.219.3.37 | `ssh -i ~/.ssh/shannon-gcp addheputra@35.219.3.37` |
-
-### SSH Quick Commands
-
-```bash
-# DevOps worker
-ssh -i ~/.ssh/shannon-gcp addheputra@35.219.66.164
-
-# Backend worker
-ssh -i ~/.ssh/shannon-gcp addheputra@35.219.3.37
-
-# Check OpenClaw status
-ssh -i ~/.ssh/shannon-gcp addheputra@WORKER_IP "sudo systemctl status openclaw"
-
-# View logs
-ssh -i ~/.ssh/shannon-gcp addheputra@WORKER_IP "sudo journalctl -u openclaw -n 50"
-
-# Check config
-ssh -i ~/.ssh/shannon-gcp addheputra@WORKER_IP "sudo cat /home/openclaw/.openclaw/openclaw.json | grep -A5 telegram"
-```
+| Task | Command |
+|------|---------|
+| List Workers | `gcloud compute instances list --filter="name:ocl-worker"` |
+| Start Worker | `gcloud compute instances start ocl-worker-devops-001-stg --zone=asia-southeast2-a` |
+| Stop Worker | `gcloud compute instances stop ocl-worker-devops-001-stg --zone=asia-southeast2-a` |
+| Delete Worker | `gcloud compute instances delete ocl-worker-devops-001-stg --zone=asia-southeast2-a --quiet` |
+| Check OpenClaw Status | `gcloud compute ssh WORKER_NAME --zone=asia-southeast2-a --command="sudo systemctl status openclaw"` |
+| View Worker Logs | `gcloud compute ssh WORKER_NAME --zone=asia-southeast2-a --command="sudo journalctl -u openclaw -n 50"` |
+| Update Bot Token | `gcloud compute ssh WORKER_NAME --command="sudo sed -i 's/OLD_TOKEN/NEW_TOKEN/g' /home/openclaw/.openclaw/openclaw.json && sudo systemctl restart openclaw"` |
 
 ---
 
 ## Support
 
 - **Documentation:** `docs/` directory
+- **Worker Deployment:** [WORKER_DEPLOYMENT.md](WORKER_DEPLOYMENT.md)
+- **MasterControl Deployment:** [MASTERCONTROL_DEPLOYMENT.md](MASTERCONTROL_DEPLOYMENT.md)
 - **Issues:** [GitHub Issues](https://github.com/addhe/openclaw-config-backup/issues)
 - **Logs:** Check `/var/log/ansible/` on target hosts

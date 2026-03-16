@@ -48,6 +48,7 @@ devices/
 
 # Identity sensitive files
 identity/
+
 # Ansible vault files with secrets
 **/inventory/*/group_vars/vault.yml
 **/inventory/*/host_vars/*/vault.yml
@@ -60,3 +61,7 @@ identity/
 
 # Host-specific secrets (bot tokens per worker)
 **/inventory/*/host_vars/
+
+# Ansible vault files (encrypted secrets)
+vault.yml
+**/vault.yml

@@ -1,0 +1,113 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.3.8",
+    "lastTouchedAt": "{{ ansible_date_time.iso8601 }}",
+    "botType": "mastercontrol"
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "{{ openclaw_model }}"
+      },
+      "workspace": "{{ openclaw_workspace }}",
+      "maxConcurrent": 2,
+      "subagents": {
+        "maxConcurrent": 4
+      },
+      "compaction": {
+        "mode": "safeguard",
+        "reserveTokensFloor": 12000,
+        "memoryFlush": {
+          "enabled": true,
+          "softThresholdTokens": 8000
+        }
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "name": "mastercontrol",
+        "workspace": "{{ openclaw_workspace }}",
+        "agentDir": "/home/{{ openclaw_user }}/.openclaw/agents/main/agent",
+        "model": "{{ openclaw_model }}"
+      }
+    ]
+  },
+  "messages": {
+    "ackReactionScope": "none",
+    "tts": {
+      "auto": "never"
+    }
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto",
+    "restart": true
+  },
+  "session": {
+    "dmScope": "per-channel-peer"
+  },
+  "hooks": {
+    "internal": {
+      "enabled": true,
+      "entries": {
+        "boot-md": {
+          "enabled": true
+        },
+        "bootstrap-extra-files": {
+          "enabled": true
+        },
+        "command-logger": {
+          "enabled": true
+        },
+        "session-memory": {
+          "enabled": true
+        }
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "dmPolicy": "strict",
+      "botToken": "{{ telegram_bot_token }}",
+      "groups": {
+        "enabled": false
+      },
+      "allowFrom": {{ telegram_allowed_users | to_nice_json }},
+      "groupPolicy": "deny",
+      "streamMode": "partial",
+      "_comment": "MASTERCONTROL: DM ONLY, NO GROUP ACCESS, OWNER ONLY"
+    }
+  },
+  "gateway": {
+    "port": {{ gateway_port }},
+    "mode": "{{ gateway_mode }}",
+    "bind": "{{ gateway_bind }}",
+    "auth": {
+      "mode": "token",
+      "token": "{{ gateway_token }}"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    },
+    "nodes": {
+      "denyCommands": [
+        "camera.snap",
+        "camera.clip",
+        "screen.record",
+        "calendar.add",
+        "contacts.add",
+        "reminders.add"
+      ]
+    }
+  },
+  "plugins": {
+    "entries": {
+      "telegram": {
+        "enabled": true
+      }
+    }
+  }
+}

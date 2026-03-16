@@ -71,6 +71,46 @@
     - TOOLS.md
     - HEARTBEAT.md
 
+- name: Deploy MEMORY.md with owner configuration
+  template:
+    src: MEMORY.md.j2
+    dest: "/home/{{ openclaw_user }}/.openclaw/workspace/MEMORY.md"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0644'
+    force: no
+
+- name: Deploy IDENTITY.md template
+  copy:
+    src: IDENTITY.md
+    dest: "/home/{{ openclaw_user }}/.openclaw/workspace/IDENTITY.md"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0644'
+    force: no
+
+- name: Deploy worker identity startup script
+  copy:
+    src: startup-script.sh
+    dest: /usr/local/bin/openclaw-worker-startup.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Deploy worker identity systemd service
+  copy:
+    src: worker-identity.service
+    dest: /etc/systemd/system/openclaw-worker-identity.service
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Enable worker identity service
+  systemd:
+    name: openclaw-worker-identity
+    enabled: yes
+    daemon_reload: yes
+
 - name: Deploy systemd service
   template:
     src: openclaw.service.j2
