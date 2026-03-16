@@ -99,6 +99,30 @@
       ]
     }
   },
+  "models": {
+    "providers": {
+      "ollama": {
+        "baseUrl": "{{ ollama_cloud_host | default('https://ollama.com') }}",
+        "api": "ollama",
+        "models": [
+          {
+            "id": "{{ ollama_cloud_model | default('glm-5') }}",
+            "name": "{{ ollama_cloud_model | default('glm-5') | upper }}",
+            "reasoning": false,
+            "input": ["text"],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 131072,
+            "maxTokens": 1310720
+          }
+        ]
+      }
+    }
+  },
   "plugins": {
     "entries": {
       "telegram": {

@@ -49,7 +49,7 @@
 
   post_tasks:
     - name: Verify DM-only configuration
-      command: "grep -q '\"dmPolicy\": \"strict\"' /home/{{ openclaw_user }}/.openclaw/openclaw.json"
+      command: "grep -q '\"dmPolicy\": \"allowlist\"' /home/{{ openclaw_user }}/.openclaw/openclaw.json"
       register: dm_check
       changed_when: false
       failed_when: dm_check.rc != 0

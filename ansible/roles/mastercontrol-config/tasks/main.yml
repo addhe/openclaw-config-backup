@@ -23,6 +23,15 @@
     group: "{{ openclaw_group }}"
     mode: '0600'
 
+- name: Deploy auth-profiles.json (Ollama provider registration)
+  template:
+    src: auth-profiles.json.j2
+    dest: "/home/{{ openclaw_user }}/.openclaw/agents/main/agent/auth-profiles.json"
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0600'
+  when: vault_ollama_api_key | default('') | length > 0
+
 - name: Deploy .env file
   template:
     src: env.j2
