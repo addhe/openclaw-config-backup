@@ -15,7 +15,6 @@ zones:
 # Only discover mastercontrol VMs
 filters:
   - "labels.role = mastercontrol"
-  - "labels.environment = staging"
   - "status = RUNNING"
 
 # Use VM name as hostname (not IP)
