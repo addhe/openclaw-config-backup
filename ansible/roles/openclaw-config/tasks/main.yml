@@ -57,7 +57,7 @@
     owner: "{{ openclaw_user }}"
     group: "{{ openclaw_group }}"
     mode: '0600'
-  when: ollama_cloud_enabled | default(false) | bool and ollama_cloud_api_key | length > 0
+  when: ollama_cloud_enabled | default(false) | bool and (ollama_cloud_api_key | default('')) | length > 0
 
 - name: Deploy static workspace files
   copy:
@@ -80,14 +80,21 @@
     mode: '0644'
     force: no
 
-- name: Deploy IDENTITY.md template
-  copy:
-    src: IDENTITY.md
-    dest: "/home/{{ openclaw_user }}/.openclaw/workspace/IDENTITY.md"
+- name: Create OpenClaw sessions directory
+  file:
+    path: "/home/{{ openclaw_user }}/.openclaw/sessions"
+    state: directory
     owner: "{{ openclaw_user }}"
     group: "{{ openclaw_group }}"
-    mode: '0644'
-    force: no
+    mode: '0755'
+
+- name: Create OpenClaw compile cache
+  file:
+    path: "/home/{{ openclaw_user }}/.openclaw/.compile-cache"
+    state: directory
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0755'
 
 - name: Deploy worker identity startup script
   copy:
@@ -123,15 +130,25 @@
   systemd:
     daemon_reload: yes
 
+- name: Run OpenClaw doctor fix (non-interactive)
+  command: openclaw doctor --fix
+  become: true
+  become_user: "{{ openclaw_user }}"
+  environment:
+    HOME: "/home/{{ openclaw_user }}"
+    PATH: "/usr/bin:/usr/local/bin"
+  changed_when: true
+  ignore_errors: yes
+
 - name: Enable OpenClaw service
   systemd:
     name: openclaw
     enabled: yes
 
-- name: Start OpenClaw service
+- name: Restart OpenClaw service
   systemd:
     name: openclaw
-    state: started
+    state: restarted
 
 - name: Wait for OpenClaw to be ready
   wait_for:

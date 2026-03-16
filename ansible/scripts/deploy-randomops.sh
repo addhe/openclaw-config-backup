@@ -44,6 +44,10 @@ echo -e "${CYAN}  $(date '+%Y-%m-%d %H:%M:%S %Z')${NC}"
 echo -e "${CYAN}═══════════════════════════════════════${NC}"
 echo ""
 
+# Pull latest changes
+echo -e "${YELLOW}[0/5] Pulling latest repo...${NC}"
+cd "$ANSIBLE_DIR" && git pull --quiet 2>&1 || echo "  (git pull skipped)"
+
 # ──────────────────────────────────────
 # Step 1: Destroy existing VM (if any)
 # ──────────────────────────────────────
