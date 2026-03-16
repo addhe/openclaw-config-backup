@@ -12,6 +12,7 @@
   loop:
     - ""
     - "agents/main/agent"
+    - "agents/main/sessions"
     - "workspace/memory"
 
 - name: Deploy OpenClaw config file
@@ -92,6 +93,14 @@
     group: root
     mode: '0644'
 
+- name: Create compile cache directory
+  file:
+    path: /var/tmp/openclaw-compile-cache
+    state: directory
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0755'
+
 - name: Reload systemd daemon
   systemd:
     daemon_reload: yes
@@ -101,17 +110,32 @@
     name: openclaw
     enabled: yes
 
+- name: Run OpenClaw doctor fix (non-interactive)
+  command: openclaw doctor --fix
+  become: yes
+  become_user: "{{ openclaw_user }}"
+  environment:
+    HOME: "/home/{{ openclaw_user }}"
+    OLLAMA_API_KEY: "{{ vault_ollama_api_key | default('ollama-local') }}"
+    OPENCLAW_NO_RESPAWN: "1"
+    CI: "true"
+  changed_when: true
+  ignore_errors: yes
+  timeout: 30
+
 - name: Start OpenClaw service
   systemd:
     name: openclaw
-    state: started
+    state: restarted
 
 - name: Wait for OpenClaw to be ready
   wait_for:
     port: "{{ gateway_port }}"
     host: localhost
-    delay: 5
-    timeout: 60
+    delay: 10
+    timeout: 90
+  ignore_errors: yes
+  register: gateway_wait
 
 - name: Check OpenClaw status
   command: systemctl status openclaw
@@ -130,7 +154,7 @@
       IrishEcho MasterControl Deployed!
       ================================
       Instance: {{ inventory_hostname }}
-      Environment: {{ environment | default('staging') }}
+      Environment: {{ deploy_env | default('staging') }}
       Gateway Port: {{ gateway_port }}
       Bot Token: {{ telegram_bot_token[:20] }}...
       Owner: @BroAwn (ID: {{ owner_telegram_id }})

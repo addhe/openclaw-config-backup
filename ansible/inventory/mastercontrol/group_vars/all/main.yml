@@ -22,7 +22,7 @@ gcp_network: "openclaw-staging-network"
 gcp_subnet: "openclaw-staging-subnet"
 
 # Instance Settings
-instance_type: "e2-small"  # Smaller for control plane
+instance_type: "n2d-standard-2"  # 2 vCPU, 8GB RAM for OpenClaw
 disk_size: 20
 disk_type: "pd-ssd"
 provisioning_model: "SPOT"  # Preemptible for cost savings

@@ -23,7 +23,7 @@
     - role: gcp-compute
       vars:
         gcp_instance_name: "mastercontrol-001-stg"
-        gcp_machine_type: "e2-small"
+        gcp_machine_type: "n2d-standard-2"
         gcp_disk_size: 20
         gcp_provisioning_model: "SPOT"
 

@@ -84,7 +84,7 @@ ssh-keygen -t ed25519 -f ~/.ssh/mastercontrol-gcp -N "" -C "addheputra@mastercon
 gcloud compute instances create mastercontrol-001-stg \
   --project=awanmasterpiece \
   --zone=asia-southeast2-b \
-  --machine-type=e2-small \
+  --machine-type=n2d-standard-2 \
   --provisioning-model=SPOT \
   --image-family=ubuntu-2204-lts \
   --image-project=ubuntu-os-cloud \
