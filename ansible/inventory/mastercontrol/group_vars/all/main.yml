@@ -12,7 +12,7 @@ application: "mastercontrol"
 
 # GCP Project
 gcp_project: "awanmasterpiece"
-gcp_zone: "us-central1-b"
+gcp_zone: "asia-southeast2-b"
 
 # Service Account
 gcp_service_account: "awan-master-service-account@awanmasterpiece.iam.gserviceaccount.com"

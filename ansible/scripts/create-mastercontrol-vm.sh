@@ -9,7 +9,7 @@ set -e
 
 # Configuration
 PROJECT="awanmasterpiece"
-ZONE="us-central1-b"
+ZONE="asia-southeast2-b"
 MACHINE_TYPE="e2-small"
 DISK_SIZE="20"
 INSTANCE_NAME="mastercontrol-001-stg"

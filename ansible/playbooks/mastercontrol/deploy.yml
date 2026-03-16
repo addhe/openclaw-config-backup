@@ -49,13 +49,13 @@
 
   post_tasks:
     - name: Verify DM-only configuration
-      command: grep -q '"dmPolicy": "strict"' /home/{{ openclaw_user }}/.openclaw/openclaw.json
+      command: "grep -q '\"dmPolicy\": \"strict\"' /home/{{ openclaw_user }}/.openclaw/openclaw.json"
       register: dm_check
       changed_when: false
       failed_when: dm_check.rc != 0
 
     - name: Verify owner-only configuration
-      command: grep -q '"{{ owner_telegram_id }}"' /home/{{ openclaw_user }}/.openclaw/openclaw.json
+      command: "grep -q '\"{{ owner_telegram_id }}\"' /home/{{ openclaw_user }}/.openclaw/openclaw.json"
       register: owner_check
       changed_when: false
       failed_when: owner_check.rc != 0

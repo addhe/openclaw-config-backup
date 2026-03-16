@@ -11,8 +11,9 @@ credentials.json
 # Config with secrets - use template instead
 openclaw.json
 
-# Personal/sensitive memory
-MEMORY.md
+# Personal/sensitive memory (workspace runtime files)
+# Note: roles/*/files/MEMORY.md is a TEMPLATE and SHOULD be committed
+!ansible/roles/*/files/MEMORY.md
 memory/
 *.memory.json
 
@@ -49,11 +50,8 @@ devices/
 # Identity sensitive files
 identity/
 
-# Ansible vault files with secrets
-**/inventory/*/group_vars/vault.yml
-**/inventory/*/host_vars/*/vault.yml
+# Ansible vault password file - NEVER commit
 .vault_password*
-*.vault
 
 # GCP service account keys
 **/gcp-sa-key.json
@@ -62,6 +60,5 @@ identity/
 # Host-specific secrets (bot tokens per worker)
 **/inventory/*/host_vars/
 
-# Ansible vault files (encrypted secrets)
-vault.yml
-**/vault.yml
+# NOTE: vault.yml files ARE committed because they are ansible-vault ENCRYPTED.
+# The vault password file (~/.ansible/vault_password) is what must NEVER be committed.

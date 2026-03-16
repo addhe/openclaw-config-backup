@@ -1,8 +1,7 @@
 {
   "meta": {
-    "lastTouchedVersion": "2026.3.8",
-    "lastTouchedAt": "{{ ansible_date_time.iso8601 }}",
-    "botType": "mastercontrol"
+    "lastTouchedVersion": "2026.3.13",
+    "lastTouchedAt": "{{ ansible_date_time.iso8601 }}"
   },
   "agents": {
     "defaults": {
@@ -36,7 +35,7 @@
   "messages": {
     "ackReactionScope": "none",
     "tts": {
-      "auto": "never"
+      "auto": "off"
     }
   },
   "commands": {
@@ -69,21 +68,18 @@
   "channels": {
     "telegram": {
       "enabled": true,
-      "dmPolicy": "strict",
+      "dmPolicy": "allowlist",
       "botToken": "{{ telegram_bot_token }}",
-      "groups": {
-        "enabled": false
-      },
+      "groups": {},
       "allowFrom": {{ telegram_allowed_users | to_nice_json }},
-      "groupPolicy": "deny",
-      "streamMode": "partial",
-      "_comment": "MASTERCONTROL: DM ONLY, NO GROUP ACCESS, OWNER ONLY"
+      "groupPolicy": "disabled",
+      "streaming": "partial"
     }
   },
   "gateway": {
     "port": {{ gateway_port }},
     "mode": "{{ gateway_mode }}",
-    "bind": "{{ gateway_bind }}",
+    "bind": "lan",
     "auth": {
       "mode": "token",
       "token": "{{ gateway_token }}"
