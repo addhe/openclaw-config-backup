@@ -11,6 +11,7 @@
     mode: '0700'
   loop:
     - ""
+    - "identity"
     - "agents/main/agent"
     - "agents/main/sessions"
     - "workspace/memory"
@@ -131,6 +132,14 @@
   changed_when: true
   ignore_errors: yes
   timeout: 30
+
+- name: Fix .openclaw ownership (doctor may create files as root)
+  file:
+    path: "/home/{{ openclaw_user }}/.openclaw"
+    state: directory
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    recurse: yes
 
 - name: Start OpenClaw service
   systemd:

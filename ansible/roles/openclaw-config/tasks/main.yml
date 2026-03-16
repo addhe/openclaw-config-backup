@@ -50,6 +50,14 @@
     group: "{{ openclaw_group }}"
     mode: '0755'
 
+- name: Create identity directory
+  file:
+    path: "/home/{{ openclaw_user }}/.openclaw/identity"
+    state: directory
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    mode: '0700'
+
 - name: Deploy auth-profiles.json (Ollama API key)
   template:
     src: auth-profiles.json.j2
@@ -139,6 +147,14 @@
     PATH: "/usr/bin:/usr/local/bin"
   changed_when: true
   ignore_errors: yes
+
+- name: Fix .openclaw ownership (doctor may create files as root)
+  file:
+    path: "/home/{{ openclaw_user }}/.openclaw"
+    state: directory
+    owner: "{{ openclaw_user }}"
+    group: "{{ openclaw_group }}"
+    recurse: yes
 
 - name: Enable OpenClaw service
   systemd:
