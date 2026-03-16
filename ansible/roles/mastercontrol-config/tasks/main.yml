@@ -37,22 +37,25 @@
 - name: Install Ansible and dependencies
   apt:
     name:
-      - ansible
       - python3-pip
+      - python3-venv
     state: present
 
-- name: Install Python dependencies for GCP dynamic inventory
+- name: Install Ansible and GCP dependencies via pip
   pip:
     name:
+      - ansible
       - google-auth
       - requests
     state: present
-  become_user: "{{ openclaw_user }}"
+    executable: pip3
 
 - name: Install Ansible google.cloud collection
   command: ansible-galaxy collection install google.cloud --force
   become: yes
   become_user: "{{ openclaw_user }}"
+  environment:
+    HOME: "/home/{{ openclaw_user }}"
   changed_when: true
 
 - name: Clone openclaw-config-backup repo
